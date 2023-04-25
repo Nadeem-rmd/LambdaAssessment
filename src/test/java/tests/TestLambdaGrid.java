@@ -1,4 +1,5 @@
 package tests;
+
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -10,7 +11,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
 public class TestLambdaGrid {
@@ -27,14 +27,11 @@ public class TestLambdaGrid {
         capabilities.setCapability("browserName", browser);
         capabilities.setCapability("version", version);
         capabilities.setCapability("platform", platform);
-        HashMap<String, Object> cloudOptions = new HashMap<>();
-        cloudOptions.put("build", "LambdaGridTest");
-        cloudOptions.put("name", "LambdaGridTest");
-        cloudOptions.put("network", true);
-        cloudOptions.put("visual", true);
-        cloudOptions.put("video", true);
-        cloudOptions.put("console", true);
-        capabilities.setCapability("cloud:options", cloudOptions);
+        capabilities.setCapability("build", "NadeemBuild");
+        capabilities.setCapability("name", "Test01");
+        capabilities.setCapability("console", true);
+        capabilities.setCapability("network", true);
+        capabilities.setCapability("visual", true);
 
         try {
             driver = new RemoteWebDriver(new URL("https://" + username + ":" + accesskey + gridURL), capabilities);
@@ -46,42 +43,49 @@ public class TestLambdaGrid {
     }
 
 
+    @org.testng.annotations.Test
+    @Parameters(value={"platform"})
+    public void testSimple(String platform) throws Exception {
 
-    @Test
-    public void testSimple() throws Exception {
-            // Navigate to URL
-            driver.get("https://www.lambdatest.com/");
+        // Navigate to URL
+        driver.get("https://www.lambdatest.com/");
 
-            WebDriverWait wWait = new WebDriverWait(driver, Duration.ofSeconds(20));
-            wWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='Logo']")));
+        WebDriverWait wWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        wWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("img[alt='Logo']")));
 
-            // Scroll to LambdaTest Integrations
-            WebElement element = driver.findElement(By.xpath("//h2[text()='Seamless Collaboration']"));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        // Scroll to LambdaTest Integrations
+        WebElement element = driver.findElement(By.xpath("//h2[text()='Seamless Collaboration']"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
 
-            // Opening LambdaTest Integrations in New tab
-            wWait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='See All Integrations']")));
-            Keys cmdCtrl = Platform.getCurrent().is(Platform.MAC) ? Keys.COMMAND : Keys.CONTROL;
-            driver.findElement(By.xpath("//a[text()='See All Integrations']")).sendKeys(Keys.chord(cmdCtrl, Keys.ENTER));
+        // Opening LambdaTest Integrations in New tab
+        WebElement lambdaIntegrations = wWait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='See All Integrations']")));
+        if (platform.contains("mac")) {
+            new Actions(driver).keyDown(Keys.COMMAND).click(lambdaIntegrations).keyUp(Keys.COMMAND).build().perform();
+        }
+        else {
+            new Actions(driver).keyDown(Keys.CONTROL).click(lambdaIntegrations).keyUp(Keys.CONTROL).build().perform();
+        }
+        wWait.until(ExpectedConditions.numberOfWindowsToBe(2));
 
-            ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
-            driver.switchTo().window(tabs.get(1));
-            wWait.until(ExpectedConditions.visibilityOfElementLocated(By.name("search")));
+        // Get Window Handles
+        ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
+        driver.switchTo().window(tabs.get(1));
+        wWait.until(ExpectedConditions.visibilityOfElementLocated(By.name("search")));
 
-            // Print Active Windows Handles
-            System.out.println("Parent Window Handle Id " + tabs.get(0));
-            System.out.println("Child Window Handle Id " + tabs.get(1));
+        // Print Active Windows Handles
+        System.out.println("Parent Window Handle Id " + tabs.get(0));
+        System.out.println("Child Window Handle Id " + tabs.get(1));
 
-            // Validate LambdaTest Integrations Url"
-            String actualUrl = driver.getCurrentUrl();
-            String expectedUrl = "https://www.lambdatest.com/integrations";
+        // Validate LambdaTest Integrations Url"
+        String actualUrl = driver.getCurrentUrl();
+        String expectedUrl = "https://www.lambdatest.com/integrations";
 
-            if (!expectedUrl.equals(actualUrl)) {
-                throw new AssertionError("Url validation failed");
-            }
-            else {
-                status = true;
-            }
+        if (!expectedUrl.equals(actualUrl)) {
+            throw new AssertionError("Url validation failed");
+        }
+        else {
+            status = true;
+        }
 
     }
 
